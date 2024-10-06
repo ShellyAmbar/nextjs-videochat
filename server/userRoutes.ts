@@ -52,7 +52,6 @@ router.post("/auth", async (req: Request, res: Response) => {
       name: user.name,
       imageId: user.imageId,
       isOnline: true,
-      messages: user.messages,
     });
   } catch (err) {
     console.log(err);

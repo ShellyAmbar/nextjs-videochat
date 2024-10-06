@@ -34,7 +34,7 @@ function ChatList({mySelf, filter = ""}: {mySelf: userProps; filter?: string}) {
   }, [users, filter]);
 
   return (
-    <ul className="my-5 flex flex-col max-h-full overflow-y-auto no-scrollbar">
+    <ul className="flex flex-col max-h-full overflow-y-auto no-scrollbar">
       {/* ChatItem */}
       {filteredUsers ? (
         filteredUsers

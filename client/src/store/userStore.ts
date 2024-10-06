@@ -43,7 +43,7 @@ export const useSelectedUser = create(
 export const useMessages = create(
   persist(
     (set) => ({
-      message: undefined,
+      messages: [],
       setMessages: (messages: any) => set({messages}),
     }),
     {
