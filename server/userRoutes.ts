@@ -6,6 +6,7 @@ import "dotenv/config";
 const router = Router();
 
 router.post("/auth", async (req: Request, res: Response) => {
+  console.log("auth ----- ");
   const {email, name, imageId} = req.body;
 
   // Check if all required fields are provided
@@ -21,10 +22,15 @@ router.post("/auth", async (req: Request, res: Response) => {
       {new: true}
     );
 
-    console.log("existingUser ----- ", existingUser);
+    console.log("existingUser ----- ", existingUser?.name);
 
     if (existingUser) {
-      user = existingUser;
+      user = new User({
+        name: existingUser.name,
+        isOnline: existingUser.isOnline,
+        imageId: existingUser.imageId,
+        email: existingUser.email,
+      });
       // If email exists but the username is different, return an error
       if (existingUser.name !== name) {
         console.log("existingUser.name !== name", existingUser.name !== name);
@@ -40,13 +46,15 @@ router.post("/auth", async (req: Request, res: Response) => {
       user = new User(req.body);
       await user.save();
     }
-    console.log("creating accessToken ----");
+    // console.log("creating accessToken ----", user.toObject().name);
 
     const accessToken = jwt.sign(
       user.toObject(),
       process.env.ACCESS_TOKEN_SECRET!
     );
-    res.setHeader("Set-Cookie", `user=${accessToken}; Path=/`);
+    console.log("accessToken ----", accessToken?.length);
+
+    res.setHeader("Set-Cookie", `user=${accessToken}; Path=/;`);
     res.send({
       email: user.email,
       name: user.name,
@@ -60,7 +68,15 @@ router.post("/auth", async (req: Request, res: Response) => {
 });
 
 router.post("/logout", async (req: Request, res: Response) => {
+  console.log("logout ----- ");
   try {
+    const data = jwt.verify(
+      req.headers.authorization,
+      process.env.ACCESS_TOKEN_SECRET
+    );
+    if (!data) {
+      res.status(401).json({message: "Invalid or expired token"});
+    }
     const {email} = req.body;
     const existingUser = await User.findOneAndUpdate(
       {email},
@@ -68,7 +84,7 @@ router.post("/logout", async (req: Request, res: Response) => {
       {new: true}
     );
     if (existingUser) {
-      console.log("updated user logot -  ", existingUser);
+      console.log("updated user logot -  ", existingUser.name);
 
       res.setHeader("Set-Cookie", `user=${null}; Path=/`);
       res.send("user logout");
@@ -81,7 +97,15 @@ router.post("/logout", async (req: Request, res: Response) => {
   }
 });
 router.post("/updateUser", async (req: Request, res: Response) => {
+  console.log("updateUser ----- ");
   try {
+    const data = jwt.verify(
+      req.headers.authorization,
+      process.env.ACCESS_TOKEN_SECRET
+    );
+    if (!data) {
+      res.status(401).json({message: "Invalid or expired token"});
+    }
     const {email, name} = req.body;
     const existingUser = await User.findOneAndUpdate(
       {email},
@@ -102,7 +126,15 @@ router.post("/updateUser", async (req: Request, res: Response) => {
 });
 
 router.get("/users", async (req: Request, res: Response) => {
+  console.log("users ----- ");
   try {
+    const data = jwt.verify(
+      req.headers.authorization,
+      process.env.ACCESS_TOKEN_SECRET
+    );
+    if (!data) {
+      res.status(401).json({message: "Invalid or expired token"});
+    }
     const users = await User.find({});
     res.send(users);
   } catch (err) {
@@ -110,11 +142,15 @@ router.get("/users", async (req: Request, res: Response) => {
   }
 });
 router.get("/user", async (req: Request, res: Response) => {
+  console.log("user ----- ");
   try {
     const data = jwt.verify(
       req.headers.authorization,
       process.env.ACCESS_TOKEN_SECRET
     );
+    if (!data) {
+      res.status(401).json({message: "Invalid or expired token"});
+    }
     const user = await User.find({email: data?.email});
     res.send(user);
   } catch (err) {
@@ -123,7 +159,15 @@ router.get("/user", async (req: Request, res: Response) => {
 });
 
 router.get("/messages", async (req: Request, res: Response) => {
+  console.log("messages ----- ");
   const {sender, reciver} = req.query;
+  const data = jwt.verify(
+    req.headers.authorization,
+    process.env.ACCESS_TOKEN_SECRET
+  );
+  if (!data) {
+    res.status(401).json({message: "Invalid or expired token"});
+  }
   const user = await User.find({email: reciver});
   const filteredUser = user[0]?.messages?.filter(
     (message: any) =>

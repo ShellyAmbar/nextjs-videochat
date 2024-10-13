@@ -36,41 +36,47 @@ io.on("connection", (socket) => {
     io.sockets.emit("new-user", "new user joined");
   });
 
-  socket.on("private message", async (to, message, mySelf) => {
-    const user = await User.find({email: to});
-    const decoded = jwt.verify(mySelf, process.env.ACCESS_TOKEN_SECRET!);
-    const sender = await User.findById(decoded);
-    io.sockets.emit("refresh", {
-      reciver: user[0].email,
-      message,
-      sender: sender?.email,
-      time: new Date(),
-    });
-    console.log("message received", {
-      reciver: user[0].email,
-      message,
-      sender: sender?.email,
-      time: new Date(),
-    });
+  socket.on("private message", async (to, message, mySelf, isVideoCall) => {
+    console.log(to, message, mySelf, isVideoCall);
+    if (mySelf) {
+      const user = await User.find({email: to});
 
-    // io.to(to).emit("message received", {from: mySelf, content: message});
-    // socket.emit("message sent", {to, content: message});
-
-    if (user) {
-      user[0].messages.push({
+      const decoded = jwt.verify(mySelf, process.env.ACCESS_TOKEN_SECRET!);
+      const sender = await User.findById(decoded);
+      io.sockets.emit("refresh", {
         reciver: user[0].email,
         message,
         sender: sender?.email,
         time: new Date(),
+        isVideoCall,
       });
-      sender?.messages.push({
-        reciver: user[0].email,
-        message,
-        sender: sender?.email,
-        time: new Date(),
-      });
-      user[0].save();
-      sender?.save();
+      // console.log("message received", {
+      //   reciver: user[0].email,
+      //   message,
+      //   sender: sender?.email,
+      //   time: new Date(),
+      //   isVideoCall,
+      // });
+
+      // io.to(to).emit("message received", {from: mySelf, content: message});
+      // socket.emit("message sent", {to, content: message});
+
+      if (user) {
+        user[0].messages.push({
+          reciver: user[0].email,
+          message,
+          sender: sender?.email,
+          time: new Date(),
+        });
+        sender?.messages.push({
+          reciver: user[0].email,
+          message,
+          sender: sender?.email,
+          time: new Date(),
+        });
+        user[0].save();
+        sender?.save();
+      }
     }
   });
 });
