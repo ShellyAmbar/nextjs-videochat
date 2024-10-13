@@ -2,6 +2,7 @@ import {handleSubmit, handleUpdateUser} from "@/lib/fetchers";
 import React, {useEffect, useState} from "react";
 import Avatar from "../Avatar";
 import {useUser} from "@/store/userStore";
+import {useCookies} from "react-cookie";
 
 function UserSettings() {
   const {myUser, setUser} = useUser((state) => ({
@@ -15,6 +16,7 @@ function UserSettings() {
   );
 
   const [errorLogin, setErrorLogin] = useState(false);
+  const [cookie] = useCookies(["user"]);
   useEffect(() => {
     console.log("user ---- ", myUser);
   }, []);
@@ -27,6 +29,7 @@ function UserSettings() {
             name: e.target[0].value,
             email: e.target[1].value,
             avatarId,
+            token: cookie.user,
           })
             .then(() => {
               alert("Updated!");

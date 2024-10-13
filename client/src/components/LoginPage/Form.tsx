@@ -21,7 +21,7 @@ function Form() {
     console.log("cookie.user ---", cookie.user);
     if (cookie.user) {
       if (!myUser) {
-        fetchUser(cookie, setUser);
+        fetchUser(cookie.user, setUser);
       }
       router.push("/chat");
     }
@@ -31,11 +31,11 @@ function Form() {
       onSubmit={(e) => {
         handleSubmit(e, avatarId)
           .then((res) => {
-            console.log("user res ---", res);
+            console.log("user res ------- ", res, cookie);
 
             setUser(res);
             socket.emit("joined", `${res?.name}`);
-            router.push("/chat");
+            // router.push("/chat");
           })
           .catch((e) => {
             setErrorLogin(true);

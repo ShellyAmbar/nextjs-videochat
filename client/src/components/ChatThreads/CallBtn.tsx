@@ -1,10 +1,10 @@
-"use client"
-import { useSelectedUser, useUser } from '@/store/userStore';
-import { PhoneIcon } from '@/utils/icons'
-import { useRouter } from 'next/navigation'
-import React from 'react';
-import { useCookies } from 'react-cookie';
-import { io } from "socket.io-client";
+"use client";
+import {useSelectedUser, useUser} from "@/store/userStore";
+import {PhoneIcon} from "@/utils/icons";
+import {useRouter} from "next/navigation";
+import React from "react";
+import {useCookies} from "react-cookie";
+import {io} from "socket.io-client";
 
 function CallBtn() {
   const router = useRouter();
@@ -18,17 +18,17 @@ function CallBtn() {
       "private message",
       selectedUser.email,
       "📞" + myUser.name + " is calling " + selectedUser.name + "📞",
-      cookie.user
-    )
+      cookie.user,
+      true
+    );
     router.push("/chat/room");
   }
 
-
   return (
-      <button onClick={handleClick}>
-          <PhoneIcon/>
+    <button onClick={handleClick}>
+      <PhoneIcon />
     </button>
-  )
+  );
 }
 
-export default CallBtn
+export default CallBtn;

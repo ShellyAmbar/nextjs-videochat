@@ -80,6 +80,7 @@ function ChatSettings() {
           email: myUser.email,
           router: router,
           socket: socket,
+          token: cookie.user,
         });
       },
     },

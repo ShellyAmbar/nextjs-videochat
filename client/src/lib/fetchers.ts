@@ -17,9 +17,12 @@ export async function handleSubmit(e: any, avatarId: string) {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include", // Required to include cookies in CORS requests
       })
         .then((res) => {
           if (res.status === 200) {
+            console.log("res.headers ----");
+
             return res.json();
           } else {
             reject();
@@ -46,11 +49,13 @@ export async function handleLogout({
   router,
 
   socket,
+  token,
 }: {
   email: string;
   name: string;
   router: AppRouterInstance;
   socket: any;
+  token: string;
 }) {
   try {
     await fetch("/logout", {
@@ -60,6 +65,7 @@ export async function handleLogout({
       }),
       headers: {
         "Content-Type": "application/json",
+        Authorization: token,
       },
     });
     socket.emit("logout", `${name}`);
@@ -74,10 +80,12 @@ export async function handleUpdateUser({
   email,
   name,
   avatarId,
+  token,
 }: {
   email: string;
   name: string;
   avatarId: string;
+  token: string;
 }) {
   return new Promise<void>(async (resolve, reject) => {
     try {
@@ -90,6 +98,7 @@ export async function handleUpdateUser({
         }),
         headers: {
           "Content-Type": "application/json",
+          Authorization: token,
         },
       })
         .then((res) => {
@@ -115,24 +124,33 @@ export async function handleUpdateUser({
 }
 
 export async function fetchUser(
-  cookie: {user?: any},
+  token: string,
   setUser: {(user: any): void; (arg0: any): void}
 ) {
-  const accessToken = cookie.user;
-  console.log("accessToken", accessToken);
+  console.log("fetchUser  ----", token);
 
   const response = await fetch("/user", {
     method: "GET",
     headers: {
-      Authorization: `${accessToken}`,
+      Authorization: token,
     },
   });
   const user = await response.json();
   setUser(user[0]);
 }
 
-export async function fetchUsers(mySelf: userProps, setUsers: any) {
-  const data = await fetch("/users");
+export async function fetchUsers(
+  mySelf: userProps,
+  setUsers: any,
+  token: string
+) {
+  console.log("fetchUsers  ----", token);
+  const data = await fetch("/users", {
+    method: "GET",
+    headers: {
+      Authorization: token,
+    },
+  });
   const myUsers = await data.json();
   setUsers(myUsers.filter((user: any) => user.email !== mySelf?.email));
 }
@@ -140,12 +158,19 @@ export async function fetchUsers(mySelf: userProps, setUsers: any) {
 export async function fetchMessages(
   sender: any,
   reciver: any,
-  setMessages: any
+  setMessages: any,
+  token: string
 ) {
   if (sender && reciver) {
     try {
       const res = await fetch(
-        `/messages?sender=${sender?.email}&reciver=${reciver?.email}`
+        `/messages?sender=${sender?.email}&reciver=${reciver?.email}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: token,
+          },
+        }
       );
       const data = await res?.json();
       setMessages(data);

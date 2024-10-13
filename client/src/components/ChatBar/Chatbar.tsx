@@ -1,8 +1,7 @@
 "use client";
-import {fetchUser} from "@/lib/fetchers";
+
 import {useUser} from "@/store/userStore";
 import React, {useState} from "react";
-import {useCookies} from "react-cookie";
 import {shallow} from "zustand/shallow";
 import SearchBar from "./SearchBar";
 import ChatList from "./ChatList";
